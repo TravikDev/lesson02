@@ -35,9 +35,10 @@ export class AuthService {
       console.log(1);
       const currentUser = await this.usersService.getUserByEmail(email);
       console.log(2);
+      const isPasswordMatching = await argon2.verify(currentUser.password, password);
 
-      const result = await this.verifyPassword(password, currentUser.password);
-      console.log(3, result);
+      // const result = await this.verifyPassword(password, currentUser.password);
+      console.log(3);
 
       currentUser.password = undefined;
       console.log(4);
@@ -48,25 +49,19 @@ export class AuthService {
     }
   }
 
-  async verifyPassword(hashedPassword: string, password: string) {
-    console.log(11);
-    console.log(hashedPassword, password);
-    try {
-      const isPasswordMatching = await argon2.verify(hashedPassword, password);
-      console.log(isPasswordMatching);
-
-      if (!isPasswordMatching) {
-        throw new BadRequestException('Something went wrong!');
-      }
-      return isPasswordMatching;
-    } catch (error) {
-      throw new BadRequestException('Failed');
-    }
-  }
+  // async verifyPassword(password: string, hashedPassword: string) {
+  //   console.log(11);
+  //   console.log(hashedPassword, password);
+  //     console.log(isPasswordMatching);
+  //     if (!isPasswordMatching) {
+  //       throw new BadRequestException('Something went wrong!');
+  //     }
+  //     return isPasswordMatching;
+  // }
 
   async getCookieWithJwtToken(userId: number) {
     const payload: TokenPayload = { userId };
-    const token = this.jwtService.sign(payload);
+    const token = this.jwtService.sign(payload, { secret: this.configService.get('JWT_SECRET')});
     return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${this.configService.get('JWT_EXPIRATION_TIME')}`;
   }
 
