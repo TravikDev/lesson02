@@ -12,10 +12,11 @@ import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { JwtAuthenticationGuard } from 'src/auth/guards/jwtAuthentication.guard';
+import { FindOneParams } from 'src/utils/findOneParams';
 
 @Controller('posts')
 export class PostsController {
-  constructor(private readonly postsService: PostsService) {}
+  constructor(private readonly postsService: PostsService) { }
 
   @Post()
   create(@Body() createPostDto: CreatePostDto) {
@@ -23,13 +24,13 @@ export class PostsController {
   }
 
   @Get()
-  @UseGuards(JwtAuthenticationGuard)
   findAll() {
     return this.postsService.getAllPosts();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  @UseGuards(JwtAuthenticationGuard)
+  findOne(@Param() { id }: FindOneParams) {
     return this.postsService.getPostById(+id);
   }
 
